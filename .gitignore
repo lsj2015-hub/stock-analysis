@@ -1,0 +1,22 @@
+# 가상 환경 디렉토리
+venv/
+.venv/
+
+# Streamlit 캐시 디렉토리
+.streamlit/
+__pycache__/
+
+# 환경 변수 파일
+.env
+
+# 데이터 파일 (예: 다운로드된 데이터 파일)
+*.csv
+*.json
+*.xlsx
+
+# 기타 IDE 관련 파일
+.vscode/
+.idea/
+
+# 로그 파일
+*.log
