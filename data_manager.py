@@ -34,9 +34,9 @@ class YahooFinanceDataManager:
             ticker = yf.Ticker(symbol)
             info = ticker.info
             if not info:
-                # info가 비어있는 경우가 있어 key 확인
-                if not info.get('symbol'): 
-                    return None 
+                # yfinance가 빈 dict나 None을 반환하는 경우 방지
+                if not info or not isinstance(info, dict) or not info.get('symbol'):
+                  return None
             return info
         except Exception as e:
             print(f"기업 정보 가져오기 실패: {e}")
@@ -64,6 +64,8 @@ class YahooFinanceDataManager:
                 else:
                     df[col] = df[col].map(lambda x: f"{int(x):,}")
         
-        # 필요한 컬럼만 선택하고 순서 정리
+        # 필요한 컬럼만 선택하고 순서를 유지합니다.
+        # 존재하지 않는 컬럼을 방어적으로 제외하여 오류를 방지합니다.
         final_cols = ["Date", "Close", "High", "Low", "Open", "Volume"]
-        return df[final_cols]
+        cols = [c for c in final_cols if c in df.columns]
+        return df[cols]

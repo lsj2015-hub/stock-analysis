@@ -111,6 +111,7 @@ if st.button("📈 투자 지표"):
 
 if st.button("📊 주가/시장 정보"):
     info = data_manager.get_info(symbol)
+    rate = get_today_usd_to_krw_rate()
     if not info:
         st.error(f"'{symbol}'에 대한 데이터를 불러올 수 없습니다. 종목 코드를 확인해주세요.")
     else:
@@ -118,12 +119,14 @@ if st.button("📊 주가/시장 정보"):
         st.markdown(f"""
         - **현재가**: ${info.get('currentPrice', 0):.2f}
         - **전일 종가**: ${info.get('previousClose', 0):.2f}
-        - **고가 / 저가 (당일)**: ${info.get('dayHigh', 0):.2f} / ${info.get('dayLow', 0):.2f}
-        - **52주 최고 / 최저**: ${info.get('fiftyTwoWeekHigh', 0):.2f} / ${info.get('fiftyTwoWeekLow', 0):.2f}
-        - **시가총액**: {format_currency(info.get('marketCap'), "KRW")}
+        - **고가 / 저가 (당일)**: \\${info.get('dayHigh', 0):.2f} / \\${info.get('dayLow', 0):.2f}
+        - **52주 최고 / 최저**: \\${info.get('fiftyTwoWeekHigh', 0):.2f} / \\${info.get('fiftyTwoWeekLow', 0):.2f}
+        - **시가총액**:  {format_currency(info.get('marketCap'), "USD", rate)}
         - **유통주식수**: {info.get('sharesOutstanding', 0):,}주
         - **거래량 (당일)**: {info.get('volume', 0):,}주
         """)
+
+        # {format_currency(info.get('marketCap'), "KRW")}
 
 if st.button("🧠 분석가 의견"):
     info = data_manager.get_info(symbol)
@@ -265,7 +268,7 @@ if submitted and ai_service: # ai_service가 초기화된 경우에만 실행
 --- 주가 데이터 시작 ---
 {df_text}
 --- 주가 데이터 끝 ---
-
+당신의 이름은 David입니다.
 위의 실제 데이터에 기반하여 아래 질문에 데이터 분석가처럼 상세하게 답해주세요.
 단, 답변은 한국어로 해주세요.
 
@@ -275,9 +278,9 @@ if submitted and ai_service: # ai_service가 초기화된 경우에만 실행
             answer = ai_service.get_qa_response(prompt, model="gpt-4o") # 모델명을 "gpt-4o" 또는 "gpt-4"로 변경
         
         # 히스토리에 Q&A 추가
-        st.session_state["chat_history"].append({"user": user_question, "ai": answer})
+        st.session_state["chat_history"].append({"user": user_question, "David": answer})
     else:
-        st.warning("먼저 '주가 데이터 조회' 버튼을 눌러 종목 데이터를 조회해야 AI가 답변할 수 있습니다.")
+        st.warning("먼저 '주가 데이터 조회' 버튼을 눌러 종목 데이터를 조회해야 David가 답변할 수 있습니다.")
 elif submitted and not ai_service:
     st.error("OpenAI API 키가 설정되지 않아 AI 서비스를 사용할 수 없습니다.")
 
@@ -286,5 +289,5 @@ elif submitted and not ai_service:
 for item in reversed(st.session_state["chat_history"]):
     st.markdown(f"""
 **사용자:** {item.get('user', '')}
-> **David:** {str(item.get('ai', ''))}
+> **David:** {str(item.get('David', ''))}
 """)

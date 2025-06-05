@@ -2,7 +2,8 @@ import platform
 import matplotlib.pyplot as plt
 from deep_translator import GoogleTranslator
 import requests
-import json
+from bs4 import BeautifulSoup
+import os
 
 # --- 한글 폰트 설정 ---
 def set_korean_font():
@@ -25,36 +26,16 @@ def translate_to_korean(text: str) -> str:
         return f"(❌ 번역 실패: {e}) " + text
     
 def get_today_usd_to_krw_rate() -> float:
-    """
-    현재 USD-KRW 환율을 가져옵니다. 
-    API 호출 실패 시 기본값(1350.0)을 반환합니다.
-    """
+    api_key = os.getenv("ALPHA_API_KEY")
     try:
-        url = "https://api.exchangerate.host/latest?base=USD&symbols=KRW"
+        url = f"https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=USD&to_currency=KRW&apikey={api_key}"
         response = requests.get(url, timeout=5)
-        response.raise_for_status()  # HTTP 오류 (4xx, 5xx) 발생 시 예외 발생
-
-        # 응답 내용을 JSON으로 파싱하기 전에 확인
-        if not response.content:
-            print("환율 API로부터 빈 응답을 받았습니다.")
-            return 1350.0
-
-        try:
-            data = response.json()
-        except json.JSONDecodeError as e:
-            print(f"환율 API 응답이 유효한 JSON 형식이 아닙니다: {e}. 응답 내용: {response.text}")
-            return 1350.0
-
-        if "rates" in data and "KRW" in data["rates"]:
-            return data["rates"]["KRW"]
-        else:
-            print(f"환율 API 응답 형식이 예상과 다릅니다: 'rates' 또는 'KRW' 키 누락. 응답: {data}")
-            return 1350.0
-    except requests.exceptions.RequestException as e:
-        print(f"환율 정보를 가져오는 데 실패했습니다 (네트워크/API 오류): {e}")
-        return 1350.0
+        response.raise_for_status()
+        data = response.json()
+        rate = float(data["Realtime Currency Exchange Rate"]["5. Exchange Rate"])
+        return rate
     except Exception as e:
-        print(f"환율 정보 처리 중 알 수 없는 오류 발생: {e}")
+        print(f"AlphaVantage 환율 정보를 가져오는 데 실패했습니다: {e}")
         return 1350.0
 
 def format_currency(amount: float, currency: str = "USD", rate: float | None = None) -> str:
@@ -116,5 +97,6 @@ def usd_with_krw_eok(usd: float) -> str:
     rate = get_today_usd_to_krw_rate()
     usd_fmt = f"{usd:,.2f}"
     krw = usd * rate
-    krw_fmt = f"{krw:,.0f}"
-    return f"{usd_fmt} ({krw_fmt} 원)"
+    eok = krw / 100_000_000
+    krw_fmt = f"{eok:,.2f}"
+    return f"{usd_fmt} ({krw_fmt} 억 원)"
