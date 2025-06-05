@@ -33,10 +33,11 @@ class YahooFinanceDataManager:
         try:
             ticker = yf.Ticker(symbol)
             info = ticker.info
-            if not info:
-                # info가 비어있는 경우가 있어 key 확인
-                if not info.get('symbol'): 
-                    return None 
+
+            # yfinance가 빈 dict나 None을 반환하는 경우 방지
+            if not info or not isinstance(info, dict) or not info.get('symbol'):
+                return None
+
             return info
         except Exception as e:
             print(f"기업 정보 가져오기 실패: {e}")
