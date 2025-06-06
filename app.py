@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import plotly.graph_objects as go
 
 # 로컬 모듈 임포트
-from utils import set_korean_font, translate_to_korean, get_today_usd_to_krw_rate, format_currency, usd_with_krw_eok
+from utils import set_korean_font, translate_to_korean, get_today_usd_to_krw_rate, format_currency
 from data_manager import YahooFinanceDataManager
 from llm_service import OpenAIService
 

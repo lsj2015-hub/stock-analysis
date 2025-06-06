@@ -2,7 +2,6 @@ import platform
 import matplotlib.pyplot as plt
 from deep_translator import GoogleTranslator
 import requests
-from bs4 import BeautifulSoup
 import os
 
 # --- 한글 폰트 설정 ---
@@ -89,14 +88,3 @@ def format_currency(amount: float, currency: str = "USD", rate: float | None = N
 
     else:
         return f"{amount:,.2f} {currency}" # 지원되지 않는 통화도 일단 표시
-
-def usd_with_krw_eok(usd: float) -> str:
-    """USD 금액을 원화 '억' 단위로 함께 표시합니다."""
-    if not usd:
-        return "-"
-    rate = get_today_usd_to_krw_rate()
-    usd_fmt = f"{usd:,.2f}"
-    krw = usd * rate
-    eok = krw / 100_000_000
-    krw_fmt = f"{eok:,.2f}"
-    return f"{usd_fmt} ({krw_fmt} 억 원)"
